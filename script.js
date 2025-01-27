@@ -15,7 +15,8 @@ initData()
 
 function initData() {
   score = INITIAL_SCORE
-  highscore = 0
+  scoreField.textContent = score
+  highscore = highscore || 0
   number = Math.trunc(Math.random() * MAX_NUMBER) + 1
   /*el math.trunc es para quitar decimales */
   console.log(number, '**************************************')
@@ -38,7 +39,14 @@ console.log(highscoreField.textContent)
 
 //eventos
 checkButton.addEventListener('click', checkNumber)
-againButton.addEventListener('click', initData)
+againButton.addEventListener('click', playAgain)
+
+//quiero que el enter equivalga a clickar el botón check
+document.addEventListener('keydown', function (event) {
+  if (event.key === 'Enter') {
+    checkNumber()
+  }
+})
 
 function checkNumber() {
   console.log('ahora comprobaríamos el número')
@@ -57,6 +65,17 @@ function checkNumber() {
     numberField.style.color = 'white'
     document.body.style.backgroundColor = '#60b347'
     checkButton.disabled = true
+
+    //si el score actual es mayor que el highscore, entonces actualizamos el
+    // highscore con el valor actual del score
+    if (score > highscore) {
+      //asignamos el valor actual de score a highscore
+      highscore = score
+      //actualizamos el texto del elemento highscoreField con el valor actual de highscore
+      highscoreField.textContent = highscore
+      //guardamos el valor en el localStorage
+      localStorage.setItem('highscore', highscore)
+    }
   } else {
     if (score > 1) {
       const message =
@@ -69,12 +88,20 @@ function checkNumber() {
     score--
     scoreField.textContent = score // actualizamos el texto del elemento scoreField con el valor actual de la variable score
   }
+}
 
-  //si es un número y es correcto... ---> comprobamos score ¿perdemos partida?
-
-  //actualizamos nuestras variables y el DOM
-
-  //si es un número y es incorrecto...
+function playAgain() {
+  initData()
+  numberField.textContent = '?'
+  numberField.style.width = '15rem'
+  numberField.style.backgroundColor = 'black'
+  numberField.style.color = '#222'
+  numberField.style.backgroundColor = '#CCCCCC'
+  document.body.style.backgroundColor = '#222'
+  checkButton.disabled = false
+  //actualizo el campo highscore y highScoreField con el localStorage
+  highscore = Number(localStorage.getItem('highscore')) || 0
+  highscoreField.textContent = highscore
 }
 
 function displayMessage(message) {
