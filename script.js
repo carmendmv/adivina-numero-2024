@@ -1,125 +1,94 @@
-'use strict'
 const INITIAL_SCORE = 20
 const MAX_NUMBER = 20
 
-let number // Lo declaro fuera de la función para que me coja el valor en cualquier lugar del script
-let score
-let highscore
-let attempts // Añado la variable para llevar el conteo de intentos
+let number, highscore, score
 
-// El estado de mi app se basa en:
-// - number --> que es el número aleatorio
-// - score
-// - highscore (se basará en intentos)
-// Si uno de estos cambia, se actualiza el DOM a posteriori
-
-initData()
-
-function initData() {
-  score = Number(localStorage.getItem('score')) || INITIAL_SCORE // Cargar score desde localStorage si existe
-  highscore = Number(localStorage.getItem('highscore')) || Infinity // Inicializo el highscore a infinito, para poder establecer el valor mínimo
-  attempts = 0 // Reinicio el contador de intentos
-  number = Math.trunc(Math.random() * MAX_NUMBER) + 1 // Genero un número aleatorio cada vez que se inicie o reinicie el juego
-  console.log(number, '**************************************')
-}
-
-/* Seleccionar todos los elementos del DOM que necesitamos */
-
+/* seleccionar todos los elementos del DOM que necesitamos */
 const messageField = document.querySelector('.message')
 const scoreField = document.querySelector('.score')
 const highscoreField = document.querySelector('.highscore')
 const numberField = document.querySelector('.number')
 const guessField = document.querySelector('.guess')
-const checkButton = document.querySelector('.check')
-const againButton = document.querySelector('.again')
+const checkBtn = document.querySelector('.check')
+const againBtn = document.querySelector('.again')
 
-if (
-  scoreField &&
-  highscoreField &&
-  numberField &&
-  guessField &&
-  checkButton &&
-  againButton
-) {
-  console.log('Elementos del DOM cargados correctamente.')
+// el estado de mi aplicación se basa en:
+// -number: número aleatorio
+// score
+// highscore
+// si uno de estos cambia, se actualiza el DOM a posteriori
 
-  // Eventos
-  checkButton.addEventListener('click', checkNumber)
-  againButton.addEventListener('click', playAgain)
+initData()
 
-  // Quiero que el enter equivalga a clickar el botón check
-  document.addEventListener('keydown', function (event) {
-    if (event.key === 'Enter') {
-      checkNumber()
-    }
-  })
-} else {
-  console.error('Algunos elementos del DOM no fueron encontrados.')
+function initData() {
+  score = INITIAL_SCORE
+  scoreField.textContent = score
+  highscore = Number(localStorage.getItem('highscore')) || 0
+  highscoreField.textContent = highscore
+  highscore = highscore || 0
+  number = Math.trunc(Math.random() * MAX_NUMBER) + 1
+  console.log(number, 'el número secreto')
+}
+
+checkBtn.addEventListener('click', checkNumber)
+
+againBtn.addEventListener('click', playAgain)
+
+// si pulsamos la tecla ENTER debería pulsar el botón checkButton
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') {
+    checkNumber()
+  }
+})
+
+function playAgain() {
+  initData()
+  numberField.textContent = '?'
+  numberField.style.width = '15rem'
+  numberField.style.fontSize = '6rem'
+  numberField.style.backgroundColor = 'white'
+  document.body.style.backgroundColor = '#222'
+  checkBtn.disabled = false
+  // actualizo el campo highscore y highscoreField con el localStorage
+  // si no hay highscore en el localStorage, highscore es 0
+  // highscore tiene que ser number!!!
+  highscore = Number(localStorage.getItem('highscore')) || 0
+  highscoreField.textContent = highscore
 }
 
 function checkNumber() {
-  console.log('Ahora comprobaríamos el número')
+  // obtenemos el número pulsado
   const guess = Number(guessField.value)
 
+  // si no es un número que lo corrija y tiene que estar entre 1 y 20
   if (!guess || guess < 1 || guess > 20) {
-    displayMessage('Por favor introduce un número entre 1 y 20')
+    displayMessage('😢 Introduce un número entre 1 y 20')
   } else if (guess === number) {
-    displayMessage('¡Has ganado!!')
+    displayMessage('🎉 Número correcto!')
     numberField.textContent = number
-    numberField.style.width = '15rem'
-    numberField.style.backgroundColor = 'black'
-    numberField.style.color = 'white'
-    document.body.style.backgroundColor = '#60b347'
-    checkButton.disabled = true
-
-    // Si los intentos actuales son menores que el highscore, actualizo el highscore
-    if (attempts < highscore) {
-      highscore = attempts
-      highscoreField.textContent = attempts
-      localStorage.setItem('highscore', highscore) // Guardo el highscore en el localStorage
+    numberField.style.width = '30rem'
+    numberField.style.fontSize = '10rem'
+    numberField.style.backgroundColor = 'red'
+    document.body.style.backgroundColor = 'green'
+    checkBtn.disabled = true
+    if (score > highscore) {
+      highscore = score
+      highscoreField.textContent = highscore
+      // guardamos el valor en el localStorage
+      localStorage.setItem('highscore', highscore)
     }
   } else {
     if (score > 1) {
       const message =
-        guess > number ? '¡Te has pasado!' : '¡Te has quedado corto!'
+        guess > number ? '😢 Te has pasado!' : '😢 Te has quedado corto!'
       displayMessage(message)
     } else {
-      displayMessage('Has perdido la partida')
-      checkButton.disabled = true // Para que una vez que el score llegue a 0, se deshabilite el botón check
+      displayMessage('😢 Perdiste!')
+      checkBtn.disabled = true
     }
     score--
-    attempts++ // Incremento el contador de intentos
-    scoreField.textContent = score // Actualizo el score en el DOM
-
-    // Guardar el score actualizado en localStorage
-    localStorage.setItem('score', score)
+    scoreField.textContent = score
   }
-}
-
-function playAgain() {
-  // Reiniciar todo cuando se vuelve a jugar
-  score = INITIAL_SCORE // Reiniciar score a 20 cuando se reinicia la partida
-  scoreField.textContent = score // Actualizo el DOM con el score reiniciado
-  attempts = 0 // Reinicio el contador de intentos
-  number = Math.trunc(Math.random() * MAX_NUMBER) + 1 // Genero un nuevo número aleatorio
-  console.log(number, '**************************************')
-  numberField.textContent = '?'
-  numberField.style.width = '15rem'
-  numberField.style.backgroundColor = 'black'
-  numberField.style.color = '#222'
-  numberField.style.backgroundColor = '#CCCCCC'
-  document.body.style.backgroundColor = '#222'
-  checkButton.disabled = false
-
-  // Vaciar el input
-  guessField.value = '' // Vaciamos el campo input al reiniciar
-
-  // Actualizo el highscore en el DOM
-  highscoreField.textContent = highscore
-
-  // Reinicio el score y los intentos en el localStorage
-  localStorage.setItem('score', score)
-  localStorage.setItem('attempts', attempts) // Reiniciar intentos en el localStorage
 }
 
 function displayMessage(message) {
