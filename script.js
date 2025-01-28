@@ -17,9 +17,9 @@ initData()
 
 function initData() {
   score = Number(localStorage.getItem('score')) || INITIAL_SCORE // Cargar score desde localStorage si existe
-  highscore = Number(localStorage.getItem('highscore')) || 0 // Inicializo el highscore con 0
+  highscore = Number(localStorage.getItem('highscore')) || Infinity // Inicializo el highscore a infinito, para poder establecer el valor mínimo
   attempts = 0 // Reinicio el contador de intentos
-  number = Math.trunc(Math.random() * MAX_NUMBER) + 1
+  number = Math.trunc(Math.random() * MAX_NUMBER) + 1 // Genero un número aleatorio cada vez que se inicie o reinicie el juego
   console.log(number, '**************************************')
 }
 
@@ -73,7 +73,7 @@ function checkNumber() {
     checkButton.disabled = true
 
     // Si los intentos actuales son menores que el highscore, actualizo el highscore
-    if (attempts < highscore || highscore === 0) {
+    if (attempts < highscore) {
       highscore = attempts
       highscoreField.textContent = attempts
       localStorage.setItem('highscore', highscore) // Guardo el highscore en el localStorage
@@ -97,10 +97,12 @@ function checkNumber() {
 }
 
 function playAgain() {
+  // Reiniciar todo cuando se vuelve a jugar
   score = INITIAL_SCORE // Reiniciar score a 20 cuando se reinicia la partida
   scoreField.textContent = score // Actualizo el DOM con el score reiniciado
   attempts = 0 // Reinicio el contador de intentos
-
+  number = Math.trunc(Math.random() * MAX_NUMBER) + 1 // Genero un nuevo número aleatorio
+  console.log(number, '**************************************')
   numberField.textContent = '?'
   numberField.style.width = '15rem'
   numberField.style.backgroundColor = 'black'
@@ -109,12 +111,15 @@ function playAgain() {
   document.body.style.backgroundColor = '#222'
   checkButton.disabled = false
 
-  highscore = Number(localStorage.getItem('highscore')) || 0 // Inicializo el highscore correctamente a 0
-  highscoreField.textContent = highscore // Muestro el highscore en el DOM
+  // Vaciar el input
+  guessField.value = '' // Vaciamos el campo input al reiniciar
 
-  // Reinicio score en el localStorage cuando se vuelve a jugar
+  // Actualizo el highscore en el DOM
+  highscoreField.textContent = highscore
+
+  // Reinicio el score y los intentos en el localStorage
   localStorage.setItem('score', score)
-  localStorage.setItem('attempts', attempts) // Guardo los intentos también (si es necesario)
+  localStorage.setItem('attempts', attempts) // Reiniciar intentos en el localStorage
 }
 
 function displayMessage(message) {
