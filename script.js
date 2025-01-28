@@ -18,7 +18,6 @@ function initData() {
   scoreField.textContent = score
   highscore = highscore || 0
   number = Math.trunc(Math.random() * MAX_NUMBER) + 1
-  /*el math.trunc es para quitar decimales */
   console.log(number, '**************************************')
 }
 
